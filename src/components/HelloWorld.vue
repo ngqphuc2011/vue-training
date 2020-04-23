@@ -1,91 +1,126 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-
     <div>
-      <b-button class="btn btn-success" @click="add">Add</b-button>
+      <b-button class="btn btn-success" @click="addTextbox">Add Textbox</b-button>
+      <b-button class="btn btn-success" @click="addImage">Add Image</b-button>
+      <b-button class="btn btn-warning" @click="submitCheck">Submit</b-button>
+      <!-- <router-link :to="{name:'Test'}" tag="b-button">Upload Image</router-link> -->
     </div>
+    <br />
 
-    <div class="grid-container">
-      <div class="grid-item" v-for="(item, index) in items" :key="index">
-        <b-input v-model="items[index].name" />
-        <b-button class="btn btn-secondary" @click="clear(index)">Clear</b-button>
-        <b-button class="btn btn-danger" @click="del(index)">Delete</b-button>
-      </div>
-    </div>
+    <!-- Textbox Component -->
+    <app-text-box v-bind:texts="texts"></app-text-box>
 
-    <div>
-      <div v-if="!image">
-        <h2>Select an image</h2>
-        <input type="file" @change="onFileChange" />
-      </div>
-      <div v-else>
-        <img :src="image" />
-        <button @click="removeImage">Remove image</button>
+    <!-- Image Upload Component -->
+    <app-image-upload v-bind:images="images"></app-image-upload>
+
+    <div :hidden="cards.length == 0">
+      <h2>Cards</h2>
+      <div class="grid-card-container">
+        <div v-for="(card, index) in cards" :key="index" class="card">
+          <p style="background-color: #eee">{{ index + 1 }}</p>
+          <img :src="cards[index].image" width="100%" />
+          <div class="container">
+            <h4>
+              <b>{{ cards[index].text }}</b>
+            </h4>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
-
-<style>
-.grid-container {
-  margin-left: 300px;
-  display: grid;
-  grid-template-columns: 33% 33% 33%;
-}
-.grid-item {
-  padding: 10px;
-}
-img {
-  width: 30%;
-  margin: auto;
-  display: block;
-  margin-bottom: 10px;
-}
-</style>
-
 <script>
+import Textbox from "./Textbox.vue";
+import ImageUpload from "./Image.vue";
+
 export default {
   name: "HelloWorld",
+  components: {
+    appTextBox: Textbox,
+    appImageUpload: ImageUpload
+  },
+
   data() {
     return {
-      msg: "Welcome to Your Vue.js App",
-      counter: 0,
-      items: [],
-      image: ""
+      texts: [],
+      images: [],
+      cards: []
     };
   },
+  computed: {
+    checkBlankText() {
+      for (let index = 0; index < this.texts.length; index++) {
+        if (this.texts[index].value == "") {
+          return false;
+        }
+      }
+      return true;
+    },
+    checkBlankImage() {
+      for (let index = 0; index < this.images.length; index++) {
+        if (this.images[index].image == "") {
+          return false;
+        }
+      }
+      return true;
+    },
+    checkEqual() {
+      return this.texts.length == this.images.length;
+    },
+    checkTextLength() {
+      return this.texts.length > 0;
+    },
+    checkImageLength() {
+      return this.images.length > 0;
+    }
+  },
   methods: {
-    add() {
-      this.items.push({ name: "" });
+    //Textbox func
+    addTextbox() {
+      this.texts.push({ value: "" });
     },
-    clear(index) {
-      this.items[index].name = "";
-    },
-    del(index) {
-      this.items.splice(index, 1);
-    },
-    onFileChange(e) {
-      console.log(e);
-      
-      var files = e.target.files
-      if (!files.length)
-        return;
-      this.createImage(files[0]);
-    },
-    createImage(file) {
-      var image = new Image();
-      var reader = new FileReader();
-      var vm = this;
 
-      reader.onload = (e) => {
-        vm.image = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    //Image func
+    addImage() {
+      this.images.push({ image: "" });
     },
-    removeImage: function (e) {
-      this.image = '';
+
+    //submit
+    submitCheck() {
+      this.cards = [];
+      if (this.checkTextLength) {
+        if (this.checkImageLength) {
+          if (this.checkEqual) {
+            if (this.checkBlankText) {
+              if (this.checkBlankImage) {
+                this.submit();
+              } else {
+                alert("All Image must be uploaded");
+              }
+            } else {
+              alert("All Textbox must be filled");
+            }
+          } else {
+            alert("The number of Textbox and Image must be equal");
+          }
+        } else {
+          alert("Image is required");
+        }
+      } else {
+        alert("Textbox is required");
+      }
+    },
+
+    submit() {
+      for (let index = 0; index < this.texts.length; index++) {
+        this.cards.push({
+          text: this.texts[index].value,
+          image: this.images[index].image
+        });
+      }
+      console.log(this.cards);
     }
   }
 };
@@ -97,15 +132,39 @@ h1,
 h2 {
   font-weight: normal;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+img {
+  width: 50%;
+  margin: auto;
+  display: block;
+  margin-bottom: 10px;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+.grid-card-container {
+  margin-left: 50px;
+  margin-right: 50px;
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
 }
-a {
-  color: #42b983;
+
+.grid-card-item {
+  padding: 10px;
+}
+
+.card {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+}
+
+/* On mouse-over, add a deeper shadow */
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Add some padding inside the card container */
+.container {
+  padding: 2px 16px;
+  background-color: #eee;
 }
 </style>
