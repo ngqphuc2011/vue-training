@@ -22,14 +22,12 @@ export default {
     texts: {
       type: Array,
       default: () => {
-        return []
+        return [];
       }
     }
   },
   data() {
-    return {
-      
-    };
+    return {};
   },
   methods: {
     clearTextbox(index) {

@@ -55,6 +55,9 @@ export default {
       reader.onload = e => {
         this.images[index].image = e.target.result;
       };
+ 
+      
+     
       reader.readAsDataURL(file);
     },
     clearImage(index) {

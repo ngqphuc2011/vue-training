@@ -1,18 +1,21 @@
 <template>
   <div class="hello">
-    <div>
-      <b-button class="btn btn-success" @click="addTextbox">Add Textbox</b-button>
-      <b-button class="btn btn-success" @click="addImage">Add Image</b-button>
-      <b-button class="btn btn-warning" @click="submitCheck">Submit</b-button>
-      <!-- <router-link :to="{name:'Test'}" tag="b-button">Upload Image</router-link> -->
-    </div>
-    <br />
+    <form>
+      <div>
+        <b-button class="btn btn-success" @click="addTextbox">Add Textbox</b-button>
+        <b-button class="btn btn-success" @click="addImage">Add Image</b-button>
+        <b-button class="btn btn-danger" @click="getDemoData">Get Demo Data</b-button>
+        <input type="submit" class="btn btn-warning" value="Submit" @click="submitCheck" />
+        <!-- <router-link :to="{name:'Test'}" tag="b-button">Upload Image</router-link> -->
+      </div>
+      <br />
 
-    <!-- Textbox Component -->
-    <app-text-box v-bind:texts="texts"></app-text-box>
+      <!-- Textbox Component -->
+      <app-text-box v-bind:texts="texts"></app-text-box>
 
-    <!-- Image Upload Component -->
-    <app-image-upload v-bind:images="images"></app-image-upload>
+      <!-- Image Upload Component -->
+      <app-image-upload v-bind:images="images"></app-image-upload>
+    </form>
 
     <div :hidden="cards.length == 0">
       <h2>Cards</h2>
@@ -44,8 +47,8 @@ export default {
 
   data() {
     return {
-      texts: [],
-      images: [],
+      texts: this.$store.state.texts,
+      images: this.$store.state.images,
       cards: []
     };
   },
@@ -87,29 +90,42 @@ export default {
       this.images.push({ image: "" });
     },
 
+    //get demo data from api
+    getDemoData() {
+      this.$store.commit('getDataFromApi')
+    },
+
     //submit
     submitCheck() {
       this.cards = [];
-      if (this.checkTextLength) {
-        if (this.checkImageLength) {
-          if (this.checkEqual) {
-            if (this.checkBlankText) {
-              if (this.checkBlankImage) {
-                this.submit();
-              } else {
-                alert("All Image must be uploaded");
-              }
-            } else {
-              alert("All Textbox must be filled");
-            }
-          } else {
-            alert("The number of Textbox and Image must be equal");
-          }
-        } else {
-          alert("Image is required");
-        }
+      let isValid =
+        this.checkTextLength &&
+        this.checkImageLength &&
+        this.checkEqual &&
+        this.checkBlankText &&
+        this.checkBlankImage;
+      let errorString = "";
+
+      if (isValid) {
+        this.submit();
       } else {
-        alert("Textbox is required");
+        if (!this.checkTextLength) {
+          errorString += "Textbox is required.\n";
+        } else if (!this.checkImageLength) {
+          errorString += "Image is required.\n";
+        } else {
+          if (!this.checkEqual) {
+            errorString += "The number of Textbox and Image must be equal.\n";
+          } else {
+            if (!this.checkBlankText) {
+              errorString += "All Textbox must be filled.\n";
+            }
+            if (!this.checkBlankImage) {
+              errorString += "All Image must be uploaded.\n";
+            }
+          }
+        }
+        alert(errorString);
       }
     },
 
@@ -120,7 +136,6 @@ export default {
           image: this.images[index].image
         });
       }
-      console.log(this.cards);
     }
   }
 };
@@ -145,10 +160,6 @@ img {
   margin-right: 50px;
   display: grid;
   grid-template-columns: 33% 33% 33%;
-}
-
-.grid-card-item {
-  padding: 10px;
 }
 
 .card {
