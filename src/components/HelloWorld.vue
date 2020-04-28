@@ -2,10 +2,17 @@
   <div class="hello">
     <form>
       <div>
-        <b-button class="btn btn-success" @click="addTextbox">Add Textbox</b-button>
-        <b-button class="btn btn-success" @click="addImage">Add Image</b-button>
-        <b-button class="btn btn-danger" @click="getDemoData">Get Demo Data</b-button>
-        <input type="submit" class="btn btn-warning" value="Submit" @click="submitCheck" />
+        <div>
+          <b-button class="btn btn-success" @click="addTextbox">Add Textbox</b-button>
+          <b-button class="btn btn-danger" @click="removeAllTextbox">Remove All Textbox</b-button>
+          <b-button class="btn btn-primary" @click="getDemoData">Get Demo Data</b-button>
+        </div>
+        <br />
+        <div>
+          <b-button class="btn btn-success" @click="addImage">Add Image</b-button>
+          <b-button class="btn btn-danger" @click="removeAllImage">Remove All Image</b-button>
+          <input type="submit" class="btn btn-warning" value="Submit" @click="submitCheck" />
+        </div>
         <!-- <router-link :to="{name:'Test'}" tag="b-button">Upload Image</router-link> -->
       </div>
       <br />
@@ -15,34 +22,38 @@
 
       <!-- Image Upload Component -->
       <app-image-upload v-bind:images="images"></app-image-upload>
-    </form>
 
-    <div :hidden="cards.length == 0">
-      <h2>Cards</h2>
-      <div class="grid-card-container">
-        <div v-for="(card, index) in cards" :key="index" class="card">
-          <p style="background-color: #eee">{{ index + 1 }}</p>
-          <img :src="cards[index].image" width="100%" />
-          <div class="container">
-            <h4>
-              <b>{{ cards[index].text }}</b>
-            </h4>
-          </div>
-        </div>
+      <div class="card-slider" :hidden="cards.length == 0">
+        <h2>Cards</h2>
+        <Slider>
+          <SliderItem v-for="(card, index) in cards" :key="index">
+            <p style="background-color: #eee">{{ index + 1 }}</p>
+            <img :src="cards[index].image" />
+            <div class="card-text">
+              <h4>
+                <p>{{ cards[index].text }}</p>
+              </h4>
+            </div>
+          </SliderItem>
+        </Slider>
       </div>
-    </div>
+      <hr />
+    </form>
   </div>
 </template>
 
 <script>
 import Textbox from "./Textbox.vue";
 import ImageUpload from "./Image.vue";
+import { Slider, SliderItem } from "vue-easy-slider";
 
 export default {
   name: "HelloWorld",
   components: {
     appTextBox: Textbox,
-    appImageUpload: ImageUpload
+    appImageUpload: ImageUpload,
+    Slider,
+    SliderItem
   },
 
   data() {
@@ -79,10 +90,17 @@ export default {
       return this.images.length > 0;
     }
   },
+  watch: {
+    checkEqual() {}
+  },
   methods: {
     //Textbox func
     addTextbox() {
       this.texts.push({ value: "" });
+    },
+
+    removeAllTextbox() {
+      this.$store.commit("removeAllTextbox");
     },
 
     //Image func
@@ -90,9 +108,13 @@ export default {
       this.images.push({ image: "" });
     },
 
+    removeAllImage() {
+      this.$store.commit("removeAllImage");
+    },
+
     //get demo data from api
     getDemoData() {
-      this.$store.commit('getDataFromApi')
+      this.$store.dispatch("getDataFromApi");
     },
 
     //submit
@@ -155,27 +177,12 @@ img {
   margin-bottom: 10px;
 }
 
-.grid-card-container {
-  margin-left: 50px;
-  margin-right: 50px;
-  display: grid;
-  grid-template-columns: 33% 33% 33%;
+.card-slider {
+  width: 20%;
+  margin: auto;
 }
 
-.card {
-  /* Add shadows to create the "card" effect */
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  transition: 0.3s;
-}
-
-/* On mouse-over, add a deeper shadow */
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-}
-
-/* Add some padding inside the card container */
-.container {
-  padding: 2px 16px;
-  background-color: #eee;
+.card-text {
+  font-family: cursive;
 }
 </style>
